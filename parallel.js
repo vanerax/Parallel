@@ -1,4 +1,5 @@
 "use strict";
+const Task = require('./task');
 
 const Status = {
    INITIAL: 0,
@@ -32,17 +33,17 @@ class Parallel {
       this._nThread = nThread;
    }
 
-   addTask(fTask) {
+   addTask(oTask) {
       var nId = this._generateTaskId();
-      this._oPendingTasks[nId] = fTask;
+      this._oPendingTasks[nId] = oTask;
       this._aPendingTaskIds.push(nId);
       if (this._isRunning()) {
-         this._process();
+         this._processMultipleTasks();
       }
    }
 
    _hasAvailableThread() {
-      return this._aRunningTaskIds.length < this._nThread;
+      return this._nThread > this._aRunningTaskIds.length;
    }
 
    _getAvailableThreadCount() {
@@ -63,7 +64,6 @@ class Parallel {
 
    _processMultipleTasks() {
       var nCount = Math.min(this._aPendingTaskIds.length, this._getAvailableThreadCount());
-      // console.log(this._aPendingTaskIds.length, this._getAvailableThreadCount());
       for (var i=0;i<nCount;i++) {
          this._process();
       }
@@ -72,14 +72,14 @@ class Parallel {
    _process() {
       if (this._isRunning() && this._hasPendingTasks() && this._hasAvailableThread()) {
          var nId = this._aPendingTaskIds.shift();
-         var fTask = this._oPendingTasks[nId];
+         var oTask = this._oPendingTasks[nId];
          delete this._oPendingTasks[nId];
-         this._oRunningTasks[nId] = fTask;
+         this._oRunningTasks[nId] = oTask;
          this._aRunningTaskIds.push(nId);
          console.log("processing " + nId);
 
-         if (typeof fTask === 'function') {
-            var oRet = fTask();
+         if (oTask instanceof Task) {
+            var oRet = oTask.execute();
             if (oRet instanceof Promise) {
                oRet.then(()=>{
                   var nPos = this._aRunningTaskIds.indexOf(nId);
@@ -102,4 +102,5 @@ class Parallel {
    }
 }
 
+Parallel.Task = Task;
 module.exports = Parallel;

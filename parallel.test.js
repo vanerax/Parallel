@@ -9,15 +9,25 @@ var fTest = () => {
    });
 };
 
-var parallel = new Parallel();
-parallel.setThread(3);
+var fTest2 = (oDeferred) => {
+   setTimeout(()=>{
+      oDeferred.resolve();
+   }, 1000);
+};
 
-parallel.addTask(fTest);
-parallel.addTask(fTest);
-parallel.addTask(fTest);
-parallel.addTask(fTest);
-parallel.addTask(fTest);
+var parallel = new Parallel();
+
+parallel.setThread(3);
+var oTask2 = new Parallel.Task(fTest2);
+parallel.addTask(oTask2);
+parallel.addTask(oTask2);
+parallel.addTask(oTask2);
+parallel.addTask(oTask2);
+parallel.addTask(oTask2);
 
 parallel.start().then(()=>{
    console.log("test ok");
 });
+
+parallel.addTask(new Parallel.Task(fTest2));
+parallel.addTask(new Parallel.Task(fTest2));
