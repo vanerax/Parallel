@@ -1,4 +1,3 @@
-"use strict";
 const Task = require('./task');
 
 const Status = {
